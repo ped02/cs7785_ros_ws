@@ -1,6 +1,6 @@
 services:
   ros2:
-    build: 
+    build:
       context: .
       args:
         - UID=${UID:-1000}

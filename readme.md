@@ -6,7 +6,7 @@ TurtleBot3 Platform - ROS2 Humble
 
 Setup:
 
-Computer: Macbook Pro M3 
+Computer: Macbook Pro M3
 
 OS: Mac OS Sonoma 14.4.1
 

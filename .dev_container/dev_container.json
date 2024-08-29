@@ -1,0 +1,15 @@
+{
+    "workspaceFolder": "/ros_ws",
+
+    "settings": {
+      "terminal.integrated.defaultProfile.linux": "bash"
+    },
+
+    "extensions": ["ms-python.debugpy",
+                    "ms-python.python",
+                    "ms-python.vscode-pylance",
+                    "ms-vscode.cmake-tools",
+                    "ms-vscode.cpptools",
+                    "ms-vscode.cpptools-extension-pack",
+                    "ms-vscode.cpptools-themes"]
+}
