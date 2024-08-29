@@ -1,3 +1,15 @@
+# Python
+__pycache__
+
+# Virtual Env
+dev/
+
+# VS Code Settings
+.vscode/
+
+# Build
+build/
+
 # Build Files
 .colcon
 ros_ws/build
@@ -8,4 +20,3 @@ ros_ws/log
 ros_ws/src/example_interfaces
 ros_ws/src/examples
 ros_ws/src/ros_tutorials
-
