@@ -1,0 +1,31 @@
+services:
+  ros2:
+    build: 
+      context: .
+      args:
+        - UID=${UID:-1000}
+        - GID=${UID:-1000}
+        - USERNAME=${USERNAME:-devuser}
+    network_mode: "host"
+    # Terminal
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    # Display
+    privileged: true
+    environment:
+      # Display
+      - DISPLAY=$DISPLAY
+      - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=/tmp/.docker.xauth
+    volumes:
+      # Display
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
+      # Mount the source code
+      - ./ros_ws:/ros_ws:rw
+      # Mount colcon build artifacts for faster rebuilds
+      # - ./.colcon/build/:/ros_ws/build/:rw
+      # - ./.colcon/install/:/ros_ws/install/:rw
+      # - ./.colcon/log/:/ros_ws/log/:rw
+
+    user: ${USERNAME:-devuser}
