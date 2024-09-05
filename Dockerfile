@@ -20,6 +20,12 @@ RUN apt install ros-dev-tools -y
 # RUN apt install ros-humble-gazebo-* -y
 RUN apt install ros-humble-ros-gz -y
 
+## Install ROS2 Utilities
+RUN apt install ros-humble-image-transport-plugins
+
+## Opencv Utils
+RUN apt install -y libcanberra-gtk-module libcanberra-gtk3-module
+
 ## Remove apt list
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -72,5 +78,7 @@ USER ${USERNAME}
 RUN echo "source /setup/entrypoint.sh" >> /home/${USERNAME}/.bashrc
 
 # Entry
+SHELL ["/bin/bash"]
+ENV SHELL /bin/bash
 ENTRYPOINT [ "/setup/entrypoint.sh" ]
 CMD [ "bash" ]
