@@ -2,7 +2,7 @@
     "workspaceFolder": "/ros_ws",
 
     "settings": {
-      "terminal.integrated.defaultProfile.linux": "bash"
+        "terminal.integrated.shell.linux": "/bin/bash"
     },
 
     "extensions": ["ms-python.debugpy",
@@ -12,4 +12,5 @@
                     "ms-vscode.cpptools",
                     "ms-vscode.cpptools-extension-pack",
                     "ms-vscode.cpptools-themes"]
+
 }
