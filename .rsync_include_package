@@ -1,0 +1,6 @@
+ros_ws/
+ros_ws/src
+ros_ws/src/turtlebot3/***
+ros_ws/src/v4l2_camera/***
+ros_ws/src/wachakorn_chase_object/***
+ros_ws/src/robot_interfaces/***
