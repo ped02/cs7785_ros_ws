@@ -34,6 +34,12 @@ setup(
             'track_color_headless = wachakorn_chase_object.track_color_headless:main',
             'track_color_ui = wachakorn_chase_object.track_color_ui:main',
             'rotate_robot_bang_bang = wachakorn_chase_object.rotate_robot_bang_bang:main',
+            'object_bounding_to_plane = wachakorn_chase_object.object_bounding_to_plane:main',
+            'rotate_robot_action = wachakorn_chase_object.rotate_robot_action:main',
+            'linear_robot_action = wachakorn_chase_object.linear_robot_action:main',
+            'filter_scan_points = wachakorn_chase_object.filter_scan_points:main',
+            'object_localize_filter = wachakorn_chase_object.object_localize_filter:main',
+            'chase_object_controller = wachakorn_chase_object.chase_object_controller:main',
         ],
     },
 )

@@ -3,7 +3,7 @@ import cv2 as cv
 
 from numbers import Number
 from collections.abc import Collection, Mapping
-from typing import Tuple, Callable, Optional
+from typing import Tuple, Callable, Optional, List
 
 import rclpy
 import rclpy.logging
@@ -11,8 +11,9 @@ import rclpy.qos
 from rclpy.node import Node, Parameter, SetParametersResult
 
 from rcl_interfaces.msg import ParameterDescriptor
+from std_msgs.msg import Header
 from sensor_msgs.msg import CompressedImage
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, PolygonStamped, Polygon, Point32
 
 from cv_bridge import CvBridge
 
@@ -125,6 +126,31 @@ def get_contour_center(contour) -> Optional[Tuple[Number, Number]]:
         centroid_y = contour_moment['m01'] / contour_moment['m00']
 
         return centroid_x, centroid_y
+
+
+def get_contour_bounding_polygon(
+    contour,
+) -> Optional[List[Tuple[Number, Number]]]:
+    rect_x, rect_y, rect_width, rect_height = cv.boundingRect(contour)
+
+    if rect_width == 0 or rect_height == 0:
+        return None
+
+    return [
+        (rect_x, rect_y),
+        (rect_x + rect_width, rect_y),
+        (rect_x + rect_width, rect_y + rect_height),
+        (rect_x, rect_y + rect_height),
+    ]
+
+
+def polygon_to_message(polygon, frame_id: str = '', time_stamp=0):
+    return PolygonStamped(
+        header=Header(stamp=time_stamp, frame_id=frame_id),
+        polygon=Polygon(
+            points=[Point32(x=float(x), y=float(y)) for x, y in polygon]
+        ),
+    )
 
 
 def display_contours(
@@ -287,7 +313,6 @@ class ImageSubscriber(Node):
             5.0 * 5.0,
             track_min_contour_area_parameter_descriptor,
         )
-
         track_max_contour_area_parameter_descriptor = ParameterDescriptor(
             description='Maximum contour area tracked (pixels^2)'
         )
@@ -355,6 +380,7 @@ class ImageSubscriber(Node):
 
         # Setup subscriber
         self.image = None
+        self.frame_id = ''
         self.image_processed = False
 
         image_qos_profile = rclpy.qos.QoSProfile(
@@ -390,7 +416,12 @@ class ImageSubscriber(Node):
             publish_image_qos_profile,
         )
 
-        self.point_publisher = self.create_publisher(Point, 'image_point', 2)
+        self.point_publisher = self.create_publisher(
+            Point, '/segmenter/image_point', 2
+        )
+        self.bounding_publisher = self.create_publisher(
+            PolygonStamped, '/segmenter/image_bounding', 2
+        )
 
         # Process timer
         self.last_process_time = self.get_clock().now()
@@ -400,8 +431,10 @@ class ImageSubscriber(Node):
 
     def set_image(self, image_data: CompressedImage):
         self.image = self.bridge.compressed_imgmsg_to_cv2(image_data, 'bgr8')
+        self.frame_id = image_data.header.frame_id
+        self.image_processed = False
 
-        self.get_logger().info(f'Received image data: {self.image.shape}')
+        # self.get_logger().info(f'Received image data[{self.frame_id}]: {self.image.shape}')
 
     def update_parameters(self) -> None:
         self.target_color_bgr = rgb_2_bgr(
@@ -491,11 +524,22 @@ class ImageSubscriber(Node):
             color_mask, self.track_min_contour_area, self.track_max_contour_area
         )
 
+        self.image_processed = True
+
         if len(object_contours) > 0:
             # Found object
             largest_center = get_contour_center(object_contours[0])
             self.point_publisher.publish(
                 Point(x=largest_center[0], y=largest_center[1])
+            )
+
+            largest_bounding = get_contour_bounding_polygon(object_contours[0])
+            self.bounding_publisher.publish(
+                polygon_to_message(
+                    largest_bounding,
+                    frame_id=self.frame_id,
+                    time_stamp=self.get_clock().now().to_msg(),
+                )
             )
 
         # Display Result

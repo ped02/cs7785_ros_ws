@@ -1,0 +1,6 @@
+focal_length: 0.00304 # 3.04 mm
+sensor_width: 0.00368 # 3.68 mm
+sensor_height: 0.00276 # 2.76 mm
+
+image_width: 320
+image_height: 240
