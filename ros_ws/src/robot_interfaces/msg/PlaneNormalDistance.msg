@@ -1,0 +1,2 @@
+geometry_msgs/Vector3 unit_normal_vector
+float64 distance

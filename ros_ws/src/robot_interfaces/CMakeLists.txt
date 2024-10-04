@@ -10,12 +10,22 @@ find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ImageDict.msg"
-  DEPENDENCIES sensor_msgs
+  "msg/PlaneNormalDistance.msg"
+  "msg/PlaneNormalDistanceStamped.msg"
+  "msg/PlaneNormalDistanceArrayStamped.msg"
+  "msg/PolygonArrayStamped.msg"
+
+  "srv/ResetState.srv"
+
+  "action/Control.action"
+  DEPENDENCIES std_msgs sensor_msgs geometry_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)
