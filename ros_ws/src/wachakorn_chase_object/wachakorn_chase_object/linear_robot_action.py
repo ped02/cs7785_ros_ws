@@ -246,6 +246,7 @@ class LinearMoveActionServer(Node):
         )
         if not reset_state_response.result:
             # Reset state failed
+            self.get_logger().error('[Goal Callback] Reset State failed!')
             return GoalResponse.REJECT
 
         return GoalResponse.ACCEPT
@@ -281,7 +282,8 @@ class LinearMoveActionServer(Node):
         BURGER_MAX_VELOCITY = 0.22  # m/s
 
         CONTROLLER_COMMAND_MIN = BURGER_MAX_VELOCITY * 0.2
-        CONTROLLER_COMMAND_MAX = BURGER_MAX_VELOCITY * 0.8
+        # CONTROLLER_COMMAND_MAX = BURGER_MAX_VELOCITY * 0.8
+        CONTROLLER_COMMAND_MAX = BURGER_MAX_VELOCITY * 0.4
 
         kp = 1 / 0.5  # give 1/0.5 seconds to correct
 
