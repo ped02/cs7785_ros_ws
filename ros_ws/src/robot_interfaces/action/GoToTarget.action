@@ -1,0 +1,7 @@
+geometry_msgs/Pose2D goal_pose
+float64 deviation
+---
+geometry_msgs/Pose2D final_pose
+bool reached
+---
+geometry_msgs/Pose2D current_pose

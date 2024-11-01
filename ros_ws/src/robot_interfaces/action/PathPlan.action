@@ -1,0 +1,8 @@
+nav_msgs/OccupancyGrid map
+geometry_msgs/Pose2D start_pose
+geometry_msgs/Pose2D goal_pose
+---
+nav_msgs/Path path
+---
+sensor_msgs/CompressedImage plan_debug
+int32 num_nodes
