@@ -12,10 +12,20 @@
 #include "robot_interfaces/msg/polygon_array_stamped.hpp"
 #include "rviz_common/message_filter_display.hpp"
 #include "rviz_common/properties/color_property.hpp"
+#include "rviz_common/properties/enum_property.hpp"
 #include "rviz_common/properties/float_property.hpp"
 
 namespace rviz_custom_plugins
 {
+	enum class DisplayMode : int
+	{
+		Triangle = 1,
+		Line = 2
+	};
+
+	template <DisplayMode mode>
+	std::string get_display_mode_name();
+
 	class PolygonArrayDisplay : public rviz_common::MessageFilterDisplay<robot_interfaces::msg::PolygonArrayStamped>
 	{
 			Q_OBJECT
@@ -33,6 +43,7 @@ namespace rviz_custom_plugins
 
 			std::unique_ptr<rviz_common::properties::ColorProperty> color_property_;
 			std::unique_ptr<rviz_common::properties::FloatProperty> alpha_property_;
+			std::unique_ptr<rviz_common::properties::EnumProperty> display_mode_property_;
 
 			std::vector<Ogre::ManualObject*> manual_objects_;
 			Ogre::MaterialPtr material_;

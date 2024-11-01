@@ -9,6 +9,18 @@
 namespace rviz_custom_plugins
 {
 
+	template <>
+	std::string get_display_mode_name<DisplayMode::Triangle>()
+	{
+		return "Triangle";
+	}
+
+	template <>
+	std::string get_display_mode_name<DisplayMode::Line>()
+	{
+		return "Line";
+	}
+
 	PolygonArrayDisplay::PolygonArrayDisplay()
 	{
 		color_property_ = std::make_unique<rviz_common::properties::ColorProperty>(
@@ -20,6 +32,17 @@ namespace rviz_custom_plugins
 		);
 		alpha_property_->setMin(0);
 		alpha_property_->setMax(1);
+
+		display_mode_property_ = std::make_unique<rviz_common::properties::EnumProperty>(
+			"Display Mode", "", "Amount of transparency to apply to the polygons.", this, SLOT(queueRender())
+		);
+
+		display_mode_property_->addOptionStd(
+			get_display_mode_name<DisplayMode::Triangle>(), static_cast<int>(DisplayMode::Triangle)
+		);
+		display_mode_property_->addOptionStd(
+			get_display_mode_name<DisplayMode::Line>(), static_cast<int>(DisplayMode::Line)
+		);
 
 		static int polygon_count = 0;
 		std::string material_name = "PolygonArrayMaterial" + std::to_string(polygon_count++);
@@ -134,44 +157,92 @@ namespace rviz_custom_plugins
 		color.a = alpha_property_->getFloat();
 		rviz_rendering::MaterialManager::enableAlphaBlending(material_, color.a);
 
+		// RVIZ_COMMON_LOG_DEBUG_STREAM("Selected mode '" << qPrintable(display_mode_property_->getValue().toString())
+		// <<
+		// "'");
+
+		int display_mode_id { display_mode_property_->getOptionInt() };
+		if ( display_mode_id == 0 )
+		{
+			// Mode not found
+			setStatus(
+				rviz_common::properties::StatusProperty::Error, "DisplayMode",
+				("Display mode not found : " + std::to_string(display_mode_id) + " .").c_str()
+			);
+			return;
+		}
+
+		DisplayMode display_mode { static_cast<DisplayMode>(display_mode_id) };
+
 		for ( size_t i { 0 }; i < num_polygons; ++i )
 		{
 			const geometry_msgs::msg::Polygon& polygon { msg->polygons[i] };
 			size_t num_points { polygon.points.size() };
 
-			if ( num_points < 3 )
+			if ( display_mode == DisplayMode::Triangle )
 			{
-				continue;
+				if ( num_points < 3 )
+				{
+					continue;
+				}
+
+				size_t num_triangles { num_points - 2 };
+				manual_objects_[i]->clear();
+				manual_objects_[i]->estimateVertexCount(2 * num_triangles * 3);
+				manual_objects_[i]->begin(
+					material_->getName(), Ogre::RenderOperation::OT_TRIANGLE_LIST, "rviz_rendering"
+				);
+
+				const geometry_msgs::msg::Point32& base_point { polygon.points[0] };
+				for ( size_t j { 0 }; j < num_triangles; ++j )
+				{
+					manual_objects_[i]->position(base_point.x, base_point.y, base_point.z);
+					manual_objects_[i]->colour(color);
+
+					manual_objects_[i]->position(
+						polygon.points[j + 1].x, polygon.points[j + 1].y, polygon.points[j + 1].z
+					);
+					manual_objects_[i]->colour(color);
+
+					manual_objects_[i]->position(
+						polygon.points[j + 2].x, polygon.points[j + 2].y, polygon.points[j + 2].z
+					);
+					manual_objects_[i]->colour(color);
+
+					// Backface Render
+					manual_objects_[i]->position(base_point.x, base_point.y, base_point.z);
+					manual_objects_[i]->colour(color);
+
+					manual_objects_[i]->position(
+						polygon.points[j + 2].x, polygon.points[j + 2].y, polygon.points[j + 2].z
+					);
+					manual_objects_[i]->colour(color);
+
+					manual_objects_[i]->position(
+						polygon.points[j + 1].x, polygon.points[j + 1].y, polygon.points[j + 1].z
+					);
+					manual_objects_[i]->colour(color);
+				}
+				manual_objects_[i]->end();
 			}
-
-			size_t num_triangles { num_points - 2 };
-			manual_objects_[i]->clear();
-			manual_objects_[i]->estimateVertexCount(2 * num_triangles * 3);
-			manual_objects_[i]->begin(material_->getName(), Ogre::RenderOperation::OT_TRIANGLE_LIST, "rviz_rendering");
-
-			const geometry_msgs::msg::Point32& base_point { polygon.points[0] };
-			for ( size_t j { 0 }; j < num_triangles; ++j )
+			else if ( display_mode == DisplayMode::Line )
 			{
-				manual_objects_[i]->position(base_point.x, base_point.y, base_point.z);
-				manual_objects_[i]->colour(color);
+				if ( num_points < 2 )
+				{
+					continue;
+				}
 
-				manual_objects_[i]->position(polygon.points[j + 1].x, polygon.points[j + 1].y, polygon.points[j + 1].z);
-				manual_objects_[i]->colour(color);
+				manual_objects_[i]->clear();
+				manual_objects_[i]->estimateVertexCount(num_points);
+				manual_objects_[i]->begin(material_->getName(), Ogre::RenderOperation::OT_LINE_STRIP, "rviz_rendering");
 
-				manual_objects_[i]->position(polygon.points[j + 2].x, polygon.points[j + 2].y, polygon.points[j + 2].z);
-				manual_objects_[i]->colour(color);
-
-				// Backface Render
-				manual_objects_[i]->position(base_point.x, base_point.y, base_point.z);
-				manual_objects_[i]->colour(color);
-
-				manual_objects_[i]->position(polygon.points[j + 2].x, polygon.points[j + 2].y, polygon.points[j + 2].z);
-				manual_objects_[i]->colour(color);
-
-				manual_objects_[i]->position(polygon.points[j + 1].x, polygon.points[j + 1].y, polygon.points[j + 1].z);
-				manual_objects_[i]->colour(color);
+				for ( size_t j { 0 }; j < num_points; ++j )
+				{
+					manual_objects_[i]->position(polygon.points[j].x, polygon.points[j].y, polygon.points[j].z);
+					manual_objects_[i]->colour(color);
+				}
+				manual_objects_[i]->end();
 			}
-			manual_objects_[i]->end();
 		}
 	}
 
