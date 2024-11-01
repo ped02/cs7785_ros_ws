@@ -7,6 +7,9 @@ dev/
 # VS Code Settings
 .vscode/
 
+# Mac
+.DS_Store
+
 # Build
 build/
 
@@ -20,3 +23,9 @@ ros_ws/log
 ros_ws/src/example_interfaces
 ros_ws/src/examples
 ros_ws/src/ros_tutorials
+
+# ROS Bags
+ros_ws/bag/test_map_1
+ros_ws/bag/test_map_2
+ros_ws/bag/test_record
+ros_ws/bag/test_record_1

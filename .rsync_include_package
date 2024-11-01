@@ -4,3 +4,4 @@ ros_ws/src/turtlebot3/***
 ros_ws/src/v4l2_camera/***
 ros_ws/src/wachakorn_chase_object/***
 ros_ws/src/robot_interfaces/***
+ros_ws/src/wachakorn_navigate_to_goal/***

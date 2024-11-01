@@ -1,0 +1,6 @@
+gtsam #https://github.com/borglab/gtsam.git
+wget https://github.com/borglab/gtsam/archive/refs/tags/4.2.tar.gz
+cmake .. -DGTSAM_BUILD_PYTHON=1
+make check
+make install
+make python-install
