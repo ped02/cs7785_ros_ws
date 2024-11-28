@@ -7,6 +7,10 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 source /turtlebot3_ws/install/setup.bash
 export TURTLEBOT3_MODEL=burger
 
+# Gazebo
+source /gz_ros_ws/install/setup.bash
+export GZ_VERSION=harmonic
+
 # Robot Specific
 export ROS_DOMAIN_ID=53
 

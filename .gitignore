@@ -26,3 +26,6 @@ ros_ws/src/ros_tutorials
 
 # ROS Bags
 ros_ws/bag
+
+# Lab6 Data
+explore/lab6

@@ -29,3 +29,6 @@ services:
       # - ./.colcon/log/:/ros_ws/log/:rw
 
     user: ${USERNAME:-devuser}
+
+    devices:
+    - "/dev/dri:/dev/dri"

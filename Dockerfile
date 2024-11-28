@@ -26,6 +26,9 @@ RUN apt install ros-humble-image-transport-plugins
 ## Opencv Utils
 RUN apt install -y libcanberra-gtk-module libcanberra-gtk3-module
 
+# Cartographer
+RUN apt install -y ros-humble-cartographer
+
 ## Remove apt list
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -35,9 +38,12 @@ RUN . /opt/ros/humble/setup.sh && \
     cd /turtlebot3_ws/src && \
     git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git && \
     git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git && \
-    git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git && \
-    cd /turtlebot3_ws && \
-    colcon build --symlink-install
+    git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git
+    # && \
+    # cd /turtlebot3_ws && \
+    # rosdep update && \
+    # rosdep install -i --from-path src --rosdistro humble -y && \
+    # colcon build --symlink-install
 
 ## Copy Setup Files
 WORKDIR /
@@ -52,6 +58,29 @@ ARG GID=${UID}
 
 ## Dev Packages
 RUN apt update && apt install gdb gdbserver nano -y
+
+# Gazebo (Optional)
+
+RUN curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg && \
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null && \
+apt update && \
+apt install gz-harmonic -y
+
+ENV GZ_VERSION harmonic
+RUN . /opt/ros/humble/setup.sh && \
+    mkdir -p /gz_ros_ws/src && \
+    cd /gz_ros_ws/src && \
+    git clone -b humble https://github.com/gazebosim/ros_gz.git && \
+    cd /gz_ros_ws && \
+    rosdep install -r --from-paths src -i -y --rosdistro humble && \
+    colcon build --symlink-install
+
+# RUN . /opt/ros/humble/setup.sh && \
+#     cd /turtlebot3_ws/src && \
+#     # git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git && \
+#     git clone -b new_gazebo https://github.com/azeey/turtlebot3_simulations.git && \
+#     cd /turtlebot3_ws && \
+#     colcon build --symlink-install
 
 # # VSs code
 # # RUN curl -fsSL https://code-server.dev/install.sh | sh
@@ -73,8 +102,28 @@ RUN groupadd --gid $GID $USERNAME \
     && mkdir -p /home/${USERNAME} \
     && chown -R ${UID}:${GID} /home/${USERNAME}
 
+RUN groupadd --gid 110 render \
+    && usermod -aG video ${USERNAME} \
+    && usermod -aG 110 ${USERNAME}
+
 # Set the user and source entrypoint in the user's .bashrc file
 USER ${USERNAME}
+
+RUN . /opt/ros/humble/setup.sh && \
+#     mkdir -p /turtlebot3_ws/src && \
+    cd /turtlebot3_ws && \
+#     git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git && \
+#     git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git && \
+#     git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git && \
+#     cd /turtlebot3_ws && \
+    rosdep update
+
+USER root
+RUN . /opt/ros/humble/setup.sh && \
+    cd /turtlebot3_ws && \
+    rosdep install -i --from-path src --rosdistro humble -y && \
+    colcon build --symlink-install
+
 RUN echo "source /setup/entrypoint.sh" >> /home/${USERNAME}/.bashrc
 
 # Entry
